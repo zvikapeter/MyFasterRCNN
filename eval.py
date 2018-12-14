@@ -11,6 +11,7 @@ import cv2
 from tensorpack.utils.utils import get_tqdm_kwargs
 
 from mafat import mafatDetection
+from mafat import MAFATMeta
 
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
