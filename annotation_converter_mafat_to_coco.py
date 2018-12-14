@@ -27,9 +27,6 @@ images_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/val2
 
 
 class _MafatMeta(object):
-    # INSTANCE_TO_BASEDIR = {
-    #     'training_imagery': 'training_imagery',
-    # }
 
     def valid(self):
         return hasattr(self, 'cat_names')
@@ -51,7 +48,7 @@ class _MafatMeta(object):
             v: k for k, v in self.category_id_to_class_id.items()}
         #cfg.DATA.CLASS_NAMES = self.class_names
 
-MafatMeta = _MafatMeta()
+COCOMeta = _MafatMeta()
 
 
 SIZE_DICT = 0

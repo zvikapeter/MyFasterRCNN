@@ -10,13 +10,15 @@ import cv2
 
 from tensorpack.utils.utils import get_tqdm_kwargs
 
+from mafat import mafatDetection
+
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 import pycocotools.mask as cocomask
 
 from coco import COCOMeta
 from common import CustomResize, clip_boxes
-from config import config as cfg
+from config import config as cfg, _DB
 
 DetectionResult = namedtuple(
     'DetectionResult',
@@ -113,7 +115,10 @@ def eval_coco(df, detect_func, tqdm_bar=None):
             results = detect_func(img)
             for r in results:
                 box = r.box
-                cat_id = COCOMeta.class_id_to_category_id[r.class_id]
+                if _DB == 'COCO':
+                    cat_id = COCOMeta.class_id_to_category_id[r.class_id]
+                if _DB == 'MAFAT':
+                    cat_id = MAFATMeta.class_id_to_category_id[r.class_id]
                 box[2] -= box[0]
                 box[3] -= box[1]
 

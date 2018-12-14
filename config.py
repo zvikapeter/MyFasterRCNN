@@ -76,7 +76,7 @@ _C.TRAINER = 'replicated'  # options: 'horovod', 'replicated'
 _C.MODE_MASK = False        # FasterRCNN or MaskRCNN
 _C.MODE_FPN = True
 
-_DB = 'COCO' #Choose MAFAT or COCO
+_DB = 'MAFAT' #Choose MAFAT or COCO
 if _DB == 'MAFAT':
     # dataset - mafat -----------------------
     _C.DATA.BASEDIR = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/'

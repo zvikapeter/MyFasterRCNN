@@ -14,7 +14,7 @@ from tensorpack.utils.argtools import log_once
 from config import config as cfg
 
 
-__all__ = ['mafatDetection', 'mafatMeta']
+__all__ = ['mafatDetection', 'MAFATMeta']
 
 
 class _mafatMeta(object):
@@ -49,15 +49,15 @@ class _mafatMeta(object):
         cfg.DATA.CLASS_NAMES = self.class_names
 
 
-mafatMeta = _mafatMeta()
+MAFATMeta = _mafatMeta()
 
 
 class mafatDetection(object):
     def __init__(self, basedir, name):
-        assert name in mafatMeta.INSTANCE_TO_BASEDIR.keys(), name
+        assert name in MAFATMeta.INSTANCE_TO_BASEDIR.keys(), name
         self.name = name
         self._imgdir = os.path.realpath(os.path.join(
-            basedir, mafatMeta.INSTANCE_TO_BASEDIR[name]))
+            basedir, MAFATMeta.INSTANCE_TO_BASEDIR[name]))
         assert os.path.isdir(self._imgdir), self._imgdir
         annotation_file = os.path.join(
             basedir, 'annotations/instances_{}.json'.format(name))
@@ -69,10 +69,10 @@ class mafatDetection(object):
         # initialize the meta
         cat_ids = self.coco.getCatIds()
         cat_names = [c['name'] for c in self.coco.loadCats(cat_ids)]
-        if not mafatMeta.valid():
-            mafatMeta.create(cat_ids, cat_names)
+        if not MAFATMeta.valid():
+            MAFATMeta.create(cat_ids, cat_names)
         else:
-            assert mafatMeta.cat_names == cat_names
+            assert MAFATMeta.cat_names == cat_names
 
         logger.info("Instances loaded from {}.".format(annotation_file))
 
@@ -155,7 +155,7 @@ class mafatDetection(object):
         # all geometrically-valid boxes are returned
         boxes = np.asarray([obj['bbox'] for obj in valid_objs], dtype='float32')  # (n, 4)
         cls = np.asarray([
-            mafatMeta.category_id_to_class_id[obj['category_id']]
+            MAFATMeta.category_id_to_class_id[obj['category_id']]
             for obj in valid_objs], dtype='int32')  # (n,)
         is_crowd = np.asarray([obj['iscrowd'] for obj in valid_objs], dtype='int8')
 
@@ -169,7 +169,7 @@ class mafatDetection(object):
                 obj['segmentation'] for obj in valid_objs]
 
     def print_class_histogram(self, imgs):
-        nr_class = len(mafatMeta.class_names)
+        nr_class = len(MAFATMeta.class_names)
         hist_bins = np.arange(nr_class + 1)
 
         # Histogram of ground-truth objects
@@ -180,7 +180,7 @@ class mafatDetection(object):
                 (entry['class'] > 0) & (entry['is_crowd'] == 0))[0]
             gt_classes = entry['class'][gt_inds]
             gt_hist += np.histogram(gt_classes, bins=hist_bins)[0]
-        data = [[mafatMeta.class_names[i], v] for i, v in enumerate(gt_hist)]
+        data = [[MAFATMeta.class_names[i], v] for i, v in enumerate(gt_hist)]
         data.append(['total', sum([x[1] for x in data])])
         table = tabulate(data, headers=['class', '#box'], tablefmt='pipe')
         logger.info("Ground-Truth Boxes:\n" + colored(table, 'cyan'))
