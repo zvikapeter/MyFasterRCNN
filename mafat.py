@@ -19,13 +19,13 @@ __all__ = ['mafatDetection', 'mafatMeta']
 
 class _mafatMeta(object):
     INSTANCE_TO_BASEDIR = {
-        'training_imagery': 'training_imagery',
-        'val_imagery': 'val_imagery',
-        #'valminusminival2014': 'val2014',
-        #'minival2014': 'val2014',
-        #'test2014': 'test2014',
-        #'train2017': 'train2017',
-        #'val2017': 'val2017',
+        'train2014': 'train2014',
+        'val2014': 'val2014',
+        'valminusminival2014': 'val2014',
+        'minival2014': 'val2014',
+        'test2014': 'test2014',
+        'train2017': 'train2017',
+        'val2017': 'val2017',
     }
 
     def valid(self):
@@ -136,8 +136,7 @@ class mafatDetection(object):
             w = np.clip(float(x1 + w), 0, width) - x1
             h = np.clip(float(y1 + h), 0, height) - y1
             # Require non-zero seg area and more than 1x1 box size
-            #if obj['area'] > 1 and w > 0 and h > 0 and w * h >= 4:
-            if w > 0 and h > 0 and w * h >= 4:
+            if obj['area'] > 1 and w > 0 and h > 0 and w * h >= 4:
                 obj['bbox'] = [x1, y1, x1 + w, y1 + h]
                 valid_objs.append(obj)
 
@@ -158,8 +157,7 @@ class mafatDetection(object):
         cls = np.asarray([
             mafatMeta.category_id_to_class_id[obj['category_id']]
             for obj in valid_objs], dtype='int32')  # (n,)
-        #is_crowd = np.asarray([obj['iscrowd'] for obj in valid_objs], dtype='int8')
-        is_crowd = False
+        is_crowd = np.asarray([obj['iscrowd'] for obj in valid_objs], dtype='int8')
 
         # add the keys
         img['boxes'] = boxes        # nx4
@@ -204,7 +202,7 @@ class mafatDetection(object):
 
 
 if __name__ == '__main__':
-    c = mafatDetection(cfg.DATA.BASEDIR, 'val_imagery')
+    c = mafatDetection(cfg.DATA.BASEDIR, 'train2014')
     gt_boxes = c.load(add_gt=True, add_mask=False)
     print("#Images:", len(gt_boxes))
     c.print_class_histogram(gt_boxes)

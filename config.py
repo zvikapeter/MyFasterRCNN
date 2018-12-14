@@ -80,8 +80,8 @@ _DB = 'COCO' #Choose MAFAT or COCO
 if _DB == 'MAFAT':
     # dataset - mafat -----------------------
     _C.DATA.BASEDIR = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/'
-    _C.DATA.TRAIN = ['training_imagery']   # i.e., trainval35k
-    _C.DATA.VAL = 'val_imagery'   # For now, only support evaluation on single dataset
+    _C.DATA.TRAIN = ['train2014']   # i.e., trainval35k
+    _C.DATA.VAL = 'val2014'   # For now, only support evaluation on single dataset
     _C.DATA.NUM_CATEGORY = 15    # zvika - was 80 categories from COCO.
     # Categories are:
     # (Small vehicle) Sedan, Hatchback, Minivan, Van, Pickup truck, Jeep, Public vehicle,
@@ -104,7 +104,7 @@ _C.BACKBONE.WEIGHTS = '/home/zvipe/Models/ObjectDetection/FasterRCNNTensorPack/t
 _C.BACKBONE.RESNET_NUM_BLOCK = [3, 4, 6, 3]     # for resnet50
 # RESNET_NUM_BLOCK = [3, 4, 23, 3]    # for resnet101
 _C.BACKBONE.FREEZE_AFFINE = False   # do not train affine parameters inside norm layers #Zvika - need to check if it means Beta & Gamma
-_C.BACKBONE.NORM = 'FreezeBN'  # options: FreezeBN, SyncBN, GN
+_C.BACKBONE.NORM = 'GN' #Zvika - was ''FreezeBN'  # options: FreezeBN, SyncBN, GN
 _C.BACKBONE.FREEZE_AT = 2  # options: 0, 1, 2
 
 # Use a base model with TF-preferred padding mode,
@@ -123,7 +123,7 @@ _C.TRAIN.NUM_GPUS = None         # by default, will be set from code
 _C.TRAIN.WEIGHT_DECAY = 1e-4
 _C.TRAIN.BASE_LR = 1e-2  # defined for a total batch size of 8. Otherwise it will be adjusted automatically
 _C.TRAIN.WARMUP = 100 #zvika - was 1000   # in terms of iterations. This is not affected by #GPUs
-_C.TRAIN.STEPS_PER_EPOCH = 200 #zvika - was and need to be 500
+_C.TRAIN.STEPS_PER_EPOCH = 50 #zvika - was and need to be 500
 
 # LR_SCHEDULE means "steps" only when total batch size is 8.
 # Otherwise the actual steps to decrease learning rate are computed from the schedule.
@@ -151,7 +151,7 @@ _C.RPN.NEGATIVE_ANCHOR_THRESH = 0.3
 
 # rpn training -------------------------
 _C.RPN.FG_RATIO = 0.5  # fg ratio amo./ng selected RPN anchors
-_C.RPN.BATCH_PER_IM = 128  #zvika - was 256 # total (across FPN levels) number of anchors that are marked valid
+_C.RPN.BATCH_PER_IM = 32  #zvika - was 256 # total (across FPN levels) number of anchors that are marked valid
 _C.RPN.MIN_SIZE = 0
 _C.RPN.PROPOSAL_NMS_THRESH = 0.7
 _C.RPN.CROWD_OVERLAP_THRESH = 0.7  # boxes overlapping crowd will be ignored.
@@ -178,7 +178,7 @@ _C.FRCNN.FG_RATIO = 0.25  # fg ratio in a ROI batch
 _C.FPN.ANCHOR_STRIDES = (4, 8, 16, 32, 64)  # strides for each FPN level. Must be the same length as ANCHOR_SIZES
 _C.FPN.PROPOSAL_MODE = 'Level'  # 'Level', 'Joint'
 _C.FPN.NUM_CHANNEL = 256
-_C.FPN.NORM = 'None'  # 'None', 'GN'
+_C.FPN.NORM = 'GN' #Zvika - was ''None'  # 'None', 'GN'
 # conv head and fc head are only used in FPN.
 # For C4 models, the head is C5
 _C.FPN.FRCNN_HEAD_FUNC = 'fastrcnn_2fc_head'

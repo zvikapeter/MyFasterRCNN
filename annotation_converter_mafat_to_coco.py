@@ -16,20 +16,20 @@ from PIL import Image
 import numpy as np
 
 #Train:
-# src_csv_file = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/train_extended.csv'
-# dst_file_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/instances_training_imagery.json'
-# images_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/training_imagery'
+#src_csv_file = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/train_extended.csv'
+#dst_file_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/instances_train2014.json'
+#images_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/train2014'
 
 #Val:
 src_csv_file = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/train_extended.csv'
-dst_file_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/instances_val_imagery.json'
-images_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/val_imagery'
+dst_file_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/annotations/instances_val2014.json'
+images_path = '/media/Data/Data/Mafat_Challenge/Dataset_for_participants_V2/val2014'
 
 
 class _MafatMeta(object):
-    INSTANCE_TO_BASEDIR = {
-        'training_imagery': 'training_imagery',
-    }
+    # INSTANCE_TO_BASEDIR = {
+    #     'training_imagery': 'training_imagery',
+    # }
 
     def valid(self):
         return hasattr(self, 'cat_names')
@@ -262,7 +262,7 @@ if __name__ == "__main__":
             x_max = max(bbox[0],bbox[1],bbox[2],bbox[3])
             y_min = min(bbox[4],bbox[5],bbox[6],bbox[7])
             y_max = max(bbox[4],bbox[5],bbox[6],bbox[7])
-            annotations.append({'image_id': int(imageId), 'id': int(tagID), 'category_id': sub_class_idx, 'bbox': [x_min,y_min,(x_max-x_min),(y_max-y_min)], 'iscrowd': 0})
+            annotations.append({'image_id': int(imageId), 'id': int(tagID), 'category_id': sub_class_idx, 'bbox': [x_min,y_min,(x_max-x_min),(y_max-y_min)], 'iscrowd': 0, 'area': (x_max-x_min)*(y_max-y_min)})
             i += 1
 
     print('Created {} annotations'.format(len(annotations)))

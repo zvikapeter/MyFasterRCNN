@@ -22,43 +22,21 @@ from common import (
     box_to_point8, point8_to_box, segmentation_to_mask)
 from config import config as cfg, _DB
 
-import os
-
-# from threading import Thread, Lock
-
-# mutex = Lock()
-
 try:
     import pycocotools.mask as cocomask
 
     # Much faster than utils/np_box_ops
     def np_iou(A, B):
         def to_xywh(box):
-            # mutex.acquire()
             box = box.copy()
-            print(['Zvika Debug - pid:', os.getpid(), ' Box Length: ', len(box), 'Box Height: ', len(box[0])])
-            print(['Zvika Debug - pid:', os.getpid(), ' box[1,2]=', box[1, 2], ' box[1,0]=', box[1, 0]])
-            temp1 = box[:, 2] - box[:, 0]
-            print(['Zvika Debug - pid:', os.getpid(), ' box[1,3]=', box[1, 3], ' box[1,1]=', box[1, 1]])
-            temp2 = box[:, 3] - box[:, 1]
-            print(['Zvika Debug - pid:', os.getpid(), ' box type=', type(box)])
-            box[:, 2] = temp1
-            box[:, 3] = temp2
-            # mutex.release()
+            box[:, 2] -= box[:, 0]
+            box[:, 3] -= box[:, 1]
             return box
 
-
-        # print(['Zvika Debug line0: anchors_xywh = to_xywh(A) - Size of anchors: ',len(A),',',len(A[0])])
-        anchors_xywh = to_xywh(A)
-        # print(['Zvika Debug line0: gtlabels_xywh = to_xywh(A)- Size of gtlabels:',len(B),',',len(B[0])])
-        gtlabels_xywh = to_xywh(B)
         ret = cocomask.iou(
-            anchors_xywh, gtlabels_xywh,
+            to_xywh(A), to_xywh(B),
             np.zeros((len(B),), dtype=np.bool))
-        # ret = cocomask.iou(
-        #     to_xywh(A), to_xywh(B),
-        #     np.zeros((len(B),), dtype=np.bool))
-        # # can accelerate even more, if using float32
+        # can accelerate even more, if using float32
         return ret.astype('float32')
 
 except ImportError:
@@ -264,6 +242,7 @@ def get_multilevel_rpn_anchor_input(im, boxes, is_crowd):
 
     inside_ind, inside_anchors = filter_boxes_inside_shape(all_anchors_flatten, im.shape[:2])
     anchor_labels, anchor_gt_boxes = get_anchor_labels(inside_anchors, boxes[is_crowd == 0], boxes[is_crowd == 1])
+
     # map back to all_anchors, then split to each level
     num_all_anchors = all_anchors_flatten.shape[0]
     all_labels = -np.ones((num_all_anchors, ), dtype='int32')
@@ -444,16 +423,6 @@ def get_train_dataflow():
 
     def preprocess(roidb):
         fname, boxes, klass, is_crowd = roidb['file_name'], roidb['boxes'], roidb['class'], roidb['is_crowd']
-        #Zvika - Debug - here is the place where we read the boxes-gt_labels from the file
-        # zvika Debug:
-        print('**************************************************************************************************************************************************')
-        print('Zvika Debug preprocess func - pid:', os.getpid())
-        print(os.getpid(), ' :fname=', fname)
-        print(os.getpid(), ' :boxes=', boxes, ' length:', len(boxes))
-        print(os.getpid(), ' :klass=', klass)
-        print(os.getpid(), ' :is_crowd=', is_crowd)
-        print('**************************************************************************************************************************************************')
-
         boxes = np.copy(boxes)
         im = cv2.imread(fname, cv2.IMREAD_COLOR)
         assert im is not None, fname
@@ -472,11 +441,6 @@ def get_train_dataflow():
         # rpn anchor:
         try:
             if cfg.MODE_FPN:
-                # print(
-                #     '**************************************************************************************************************************************************')
-                # print('Zvika Debug line5:')
-                # print('fname=', fname)
-                # print('boxes=', boxes, ' length:', len(boxes))
                 multilevel_anchor_inputs = get_multilevel_rpn_anchor_input(im, boxes, is_crowd)
                 for i, (anchor_labels, anchor_boxes) in enumerate(multilevel_anchor_inputs):
                     ret['anchor_labels_lvl{}'.format(i + 2)] = anchor_labels
