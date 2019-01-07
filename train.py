@@ -54,8 +54,9 @@ from viz import (
     draw_predictions, draw_final_outputs)
 from eval import (
     eval_coco, detect_one_image, print_evaluation_scores, DetectionResult)
-from config import finalize_configs, config as cfg
+from config import finalize_configs, config as cfg, _DB
 
+import time
 
 class DetectionModel(ModelDesc):
     def preprocess(self, image):
@@ -392,7 +393,13 @@ def offline_evaluate(pred_func, output_file):
 
 def predict(pred_func, input_file):
     img = cv2.imread(input_file, cv2.IMREAD_COLOR)
+    t=time.time()
     results = detect_one_image(img, pred_func)
+    t_final=time.time()-t
+    height, width, channels = img.shape
+    print("Time: ",t_final," for ",height*width/1e6," Mpixels , i.e. Width=",width," Height=",height," Channels=",channels)
+    print("Throughput: ",height*width/1e6/t_final," Mpixels/Sec")
+
     final = draw_final_outputs(img, results)
     viz = np.concatenate((img, final), axis=1)
     tpviz.interactive_imshow(viz)
@@ -527,7 +534,10 @@ if __name__ == '__main__':
                 assert args.evaluate.endswith('.json'), args.evaluate
                 offline_evaluate(pred, args.evaluate)
             elif args.predict:
-                COCODetection(cfg.DATA.BASEDIR, 'val2014')   # Only to load the class names into caches
+                if _DB == 'COCO':
+                    COCODetection(cfg.DATA.BASEDIR, 'val2014')  # Only to load the class names into caches
+                if _DB == 'MAFAT':
+                    mafatDetection(cfg.DATA.BASEDIR, 'val2014')  # Only to load the class names into caches
                 predict(pred, args.predict)
     else:
         is_horovod = cfg.TRAINER == 'horovod'
