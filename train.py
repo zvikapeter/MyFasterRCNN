@@ -390,18 +390,60 @@ def offline_evaluate(pred_func, output_file):
         json.dump(all_results, f)
     print_evaluation_scores(output_file)
 
+import math
+def calc_sub_images_indices(height, width, sub_height, sub_width):
+    sub_images_indices = []
+    upper = 0
+    left = 0
+    bottom = sub_height
+    right = sub_width
 
+    slices_per_col = int(math.ceil(height/ sub_height))
+    slices_per_row = int(math.ceil(width / sub_width))
+    slices = slices_per_row*slices_per_col
+    count = 1
+    for l_ind in range(0,slices_per_col):
+        for u_ind in range(0, slices_per_row):
+            upper  = u_ind*sub_height
+            bottom = upper+sub_height-1
+            left   = l_ind*sub_width
+            right  = left+sub_width-1
+            if right>width:
+                right=width
+            if bottom>height:
+                bottom=height
+            sub_images_indices.append([upper, left, bottom, right])
+            count +=1
+
+    return sub_images_indices
+
+#Prediction loop was updated to slice large images into sub images, predict on each and concentrate results
 def predict(pred_func, input_file):
     img = cv2.imread(input_file, cv2.IMREAD_COLOR)
-    t=time.time()
-    results = detect_one_image(img, pred_func)
-    t_final=time.time()-t
     height, width, channels = img.shape
+
+    sub_images_indices = calc_sub_images_indices(height,width,600,900)
+    num_images = len(sub_images_indices)
+
+    out_full_img_with_marks = img  # simple initialization
+    #Main Prediction loop
+    t = time.time()
+    for ind in range(0,num_images):
+        upper = sub_images_indices[ind][0]
+        left  = sub_images_indices[ind][1]
+        bottom= sub_images_indices[ind][2]
+        right = sub_images_indices[ind][3]
+        new_img = img[upper:bottom,left:right]
+
+        results = detect_one_image(new_img, pred_func)
+        img_with_marks = draw_final_outputs(new_img, results)
+        out_full_img_with_marks[upper:bottom,left:right] = img_with_marks
+
+    t_final = time.time() - t
     print("Time: ",t_final," for ",height*width/1e6," Mpixels , i.e. Width=",width," Height=",height," Channels=",channels)
     print("Throughput: ",height*width/1e6/t_final," Mpixels/Sec")
-
-    final = draw_final_outputs(img, results)
-    viz = np.concatenate((img, final), axis=1)
+    #viz = np.concatenate((img, out_full_img_with_marks), axis=1)
+    viz=img
     tpviz.interactive_imshow(viz)
 
 
