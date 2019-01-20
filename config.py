@@ -123,7 +123,7 @@ _C.TRAIN.NUM_GPUS = None         # by default, will be set from code
 _C.TRAIN.WEIGHT_DECAY = 1e-4
 _C.TRAIN.BASE_LR = 1e-2  # defined for a total batch size of 8. Otherwise it will be adjusted automatically
 _C.TRAIN.WARMUP = 100 #zvika - was 1000   # in terms of iterations. This is not affected by #GPUs
-_C.TRAIN.STEPS_PER_EPOCH = 50 #zvika - was and need to be 500
+_C.TRAIN.STEPS_PER_EPOCH = 300 #zvika - was and need to be 500
 
 # LR_SCHEDULE means "steps" only when total batch size is 8.
 # Otherwise the actual steps to decrease learning rate are computed from the schedule.
@@ -144,14 +144,14 @@ _C.PREPROC.PIXEL_STD = [58.395, 57.12, 57.375]
 
 # anchors ------------------------- #Zvika - need to change the anchors according to typical target sizes
 _C.RPN.ANCHOR_STRIDE = 16
-_C.RPN.ANCHOR_SIZES = (32, 64, 128, 256, 512)   # sqrtarea of the anchor box
+_C.RPN.ANCHOR_SIZES = (32, 64, 128, 256, 512)   # sqrt area of the anchor box
 _C.RPN.ANCHOR_RATIOS = (0.5, 1., 2.)
 _C.RPN.POSITIVE_ANCHOR_THRESH = 0.7
 _C.RPN.NEGATIVE_ANCHOR_THRESH = 0.3
 
 # rpn training -------------------------
 _C.RPN.FG_RATIO = 0.5  # fg ratio amo./ng selected RPN anchors
-_C.RPN.BATCH_PER_IM = 32  #zvika - was 256 # total (across FPN levels) number of anchors that are marked valid
+_C.RPN.BATCH_PER_IM = 64  #zvika - was 256 # total (across FPN levels) number of anchors that are marked valid
 _C.RPN.MIN_SIZE = 0
 _C.RPN.PROPOSAL_NMS_THRESH = 0.7
 _C.RPN.CROWD_OVERLAP_THRESH = 0.7  # boxes overlapping crowd will be ignored.
