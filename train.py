@@ -631,7 +631,8 @@ if __name__ == '__main__':
             session_init = None
         else:
             if args.load:
-                session_init = get_model_loader(args.load)
+                #session_init = get_model_loader(args.load)
+                session_init = get_model_loader(cfg.TRAINED_MODEL)
             else:
                 session_init = get_model_loader(cfg.BACKBONE.WEIGHTS) if cfg.BACKBONE.WEIGHTS else None
 

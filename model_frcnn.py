@@ -163,17 +163,23 @@ def fastrcnn_losses(labels, label_logits, fg_boxes, fg_box_logits):
         fg_accuracy = tf.where(
             empty_fg, 0., tf.reduce_mean(tf.gather(correct, fg_inds)), name='fg_accuracy')
 
+        #zvika - code copy but for my own convinience in TensorBoard
+        detection_pd = tf.where(
+            empty_fg, 0., tf.reduce_mean(tf.gather(correct, fg_inds)), name='Detection_PD')
+        detection_far = tf.where(
+            empty_fg, 0., tf.to_float(tf.truediv(num_zero, num_fg)), name='Detection_FAR')
+        classification_pd = tf.reduce_mean(correct, name='Classification_PD')
         # zvika - added classification FAR - (fg_accuracy)*(1-accuracy)
-        classification_far = tf.to_float(tf.multiply(fg_accuracy,tf.subtract(1.,accuracy), name='classification_far'))
+        classification_far = tf.to_float(tf.multiply(fg_accuracy,tf.subtract(1.,accuracy), name='Classification_FAR'))
 
     box_loss = tf.losses.huber_loss(
         fg_boxes, fg_box_logits, reduction=tf.losses.Reduction.SUM)
     box_loss = tf.truediv(
-        box_loss, tf.to_float(tf.shape(labels)[0]), name='box_loss_')
+        box_loss, tf.to_float(tf.shape(labels)[0]), name='box_loss')
 
-    add_moving_summary(label_loss, box_loss, accuracy,
-                       fg_accuracy, false_negative, tf.to_float(num_fg, name='num_fg_label'),
-                       classification_far)
+    add_moving_summary(detection_pd, detection_far, classification_pd, classification_far,
+                       label_loss, box_loss, accuracy,
+                       fg_accuracy, false_negative, tf.to_float(num_fg, name='num_fg_label'))
     return label_loss, box_loss
 
 
